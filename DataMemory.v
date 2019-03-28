@@ -11,7 +11,7 @@
 ******************************************************************/
 
 module DataMemory 
-#(	parameter DATA_WIDTH=8,
+#(	parameter DATA_WIDTH=32,
 	parameter MEMORY_DEPTH = 1024
 
 )

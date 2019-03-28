@@ -32,16 +32,16 @@ assign  PortOut = 0;
 wire BranchNE_wire;
 wire BranchEQ_wire;
 wire RegDst_wire;
-wire NotZeroANDBrachNE;
-wire ZeroANDBrachEQ;
-wire ORForBranch;
+wire NotZeroANDBrachNE;  						/********* SIN USAR **********/
+wire ZeroANDBrachEQ;								/********* SIN USAR **********/
+wire ORForBranch;									
 wire ALUSrc_wire;
 wire RegWrite_wire;
 wire Zero_wire;
 wire [2:0] ALUOp_wire;
 wire [3:0] ALUOperation_wire;
 wire [4:0] WriteRegister_wire;
-wire [31:0] MUX_PC_wire;
+wire [31:0] MUX_PC_wire;					
 wire [31:0] PC_wire;
 wire [31:0] Instruction_wire;
 wire [31:0] ReadData1_wire;
@@ -50,9 +50,14 @@ wire [31:0] InmmediateExtend_wire;
 wire [31:0] ReadData2OrInmmediate_wire;
 wire [31:0] ALUResult_wire;
 wire [31:0] PC_4_wire;
-wire [31:0] InmmediateExtendAnded_wire;
-wire [31:0] PCtoBranch_wire;
+wire [31:0] InmmediateExtendAnded_wire; 	
+wire [31:0] PCtoBranch_wire;					/********* SIN USAR **********/
 integer ALUStatus;
+//Wires añadidos
+wire PCSrc;
+wire [31:0] InmmediateExtend_SL2_wire;
+/************ MODULOS SIN USAR: ******************/
+		ShiftLeft2
 
 
 //******************************************************************/
@@ -80,11 +85,18 @@ PC_Register_b
 (
 	.clk(clk),
 	.reset(reset),
-	.NewPC(PC_4_wire),
+	.NewPC(MUX_PC_wire),
 	.PCValue(PC_wire)
 );
 
 
+ORGate
+ORGate_BranchNE_BranchEQ
+(
+	.A(BranchNE_wire),
+	.B(BranchEQ_wire),
+	.C(ORForBranch)
+);
 
 
 
@@ -194,8 +206,44 @@ ArithmeticLogicUnit
 	.ALUResult(ALUResult_wire)
 );
 
-assign ALUResultOut = ALUResult_wire;
+ANDGate
+AND_Branch_ZeroWire
+(
+	.A(ORForBranch),
+	.B(Zero_wire),
+	.C(PCSrc)
+);
 
+ShiftLeft2
+SL2_SignExtend
+(
+	.DataInput(InmmediateExtend_wire),
+	.DataOutput(InmmediateExtend_SL2_wire)
+);
+
+Adder32bits
+PC4_Immediate
+(
+	.Data0(PC_4_wire),
+	.Data1(InmmediateExtend_SL2_wire),
+	.Result(InmmediateExtendAnded_wire)
+);
+
+Multiplexer2to1
+#(
+	.NBits(32)
+)
+MUX_ForReadDataAndInmediate
+(
+	.Selector(PCSrc),
+	.MUX_Data0(PC_4_wire),
+	.MUX_Data1(InmmediateExtendAnded_wire),
+	
+	.MUX_Output(MUX_PC_wire)
+
+);
+
+assign ALUResultOut = ALUResult_wire;
 
 endmodule
 

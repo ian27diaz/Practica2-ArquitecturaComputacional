@@ -2,7 +2,7 @@
 * Description
 *	This is control unit for the MIPS processor. The control unit is 
 *	in charge of generation of the control signals. Its only input 
-*	corresponds to opcode from the instruction.
+*	corrponds to opcode from the instruction.
 *	1.0
 * Author:
 *	Dr. José Luis Pizano Escalante
@@ -26,10 +26,13 @@ module Control
 	output [2:0]ALUOp
 );
 localparam R_Type = 0;
-localparam I_Type_ADDI = 6'h8;
-localparam I_Type_ORI = 6'h0d;
+localparam I_Type_ADDI = 6'h08;
+localparam I_Type_ORI =  6'h0d;
 localparam I_Type_ANDI = 6'h0c;
-localparam I_Type_LUI = 6'h0f;
+localparam I_Type_LUI =  6'h0f;
+localparam I_Type_BEQ =  6'h04;
+localparam I_Type_BNE =  6'h05;
+
 
 reg [10:0] ControlValues;
 
@@ -41,6 +44,8 @@ always@(OP) begin
 		I_Type_ORI:	  ControlValues= 11'b0_101_00_00_101;
 		I_Type_ANDI:  ControlValues= 11'b0_101_00_00_110;
 		I_Type_LUI:	  ControlValues= 11'b0_101_00_00_001;
+		I_Type_BEQ:	  ControlValues= 11'b0_101_00_01_010; //Modificacion BEQ
+		I_Type_BNE:	  ControlValues= 11'b0_101_00_10_011;
 		default:
 			ControlValues= 10'b0000000000;
 		endcase
