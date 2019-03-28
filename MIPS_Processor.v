@@ -57,7 +57,7 @@ integer ALUStatus;
 wire PCSrc;
 wire [31:0] InmmediateExtend_SL2_wire;
 /************ MODULOS SIN USAR: ******************/
-		ShiftLeft2
+		//ShiftLeft2
 
 
 //******************************************************************/
@@ -76,6 +76,7 @@ ControlUnit
 	.ALUSrc(ALUSrc_wire),	
 	.RegWrite(RegWrite_wire)
 );
+
 
 PC_Register
 #(
@@ -233,7 +234,7 @@ Multiplexer2to1
 #(
 	.NBits(32)
 )
-MUX_ForReadDataAndInmediate
+Mux_PC4Wire_ImmediateExtendedAndedWire
 (
 	.Selector(PCSrc),
 	.MUX_Data0(PC_4_wire),
