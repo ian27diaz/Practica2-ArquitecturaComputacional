@@ -20,6 +20,7 @@
 module ALU 
 (
 	input [3:0] ALUOperation,
+	input [31:0] rs,
 	input [31:0] A,
 	input [31:0] B,
 	input [4:0] shamt,
@@ -57,10 +58,11 @@ localparam BRANCH = 4'b1000;
 		  LUI:
 			ALUResult= {B[15:0], 16'h0000};
 		  BRANCH:
-			ALUResult = 0;
+			ALUResult = rs - A;
 		default:
 			ALUResult= 0;
 		endcase // case(control)
 		Zero = (ALUResult==0) ? 1'b1 : 1'b0;
+		ALUResult = (ALUOperation == BRANCH)? rs : ALUResult;
      end // always @ (A or B or control)
 endmodule // alu

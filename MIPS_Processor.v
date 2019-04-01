@@ -32,9 +32,8 @@ assign  PortOut = 0;
 wire BranchNE_wire;
 wire BranchEQ_wire;
 wire RegDst_wire;
-wire NotZeroANDBrachNE;  						/********* SIN USAR **********/
-wire ZeroANDBrachEQ;								/********* SIN USAR **********/
-wire ORForBranch;									
+wire NotZeroANDBrachNE;  					
+wire ZeroANDBrachEQ;													
 wire ALUSrc_wire;
 wire RegWrite_wire;
 wire Zero_wire;
@@ -89,19 +88,6 @@ PC_Register_b
 	.NewPC(MUX_PC_wire),
 	.PCValue(PC_wire)
 );
-
-
-ORGate
-ORGate_BranchNE_BranchEQ
-(
-	.A(BranchNE_wire),
-	.B(BranchEQ_wire),
-	.C(ORForBranch)
-);
-
-
-
-
 
 
 
@@ -200,6 +186,7 @@ ALU
 ArithmeticLogicUnit 
 (
 	.ALUOperation(ALUOperation_wire),
+	.rs(ReadData2_wire),
 	.A(ReadData1_wire),
 	.B(ReadData2OrInmmediate_wire),
 	.shamt(Instruction_wire[10:6]),
@@ -208,10 +195,27 @@ ArithmeticLogicUnit
 );
 
 ANDGate
-AND_Branch_ZeroWire
+ZeroAndBranchEQ_AND
 (
-	.A(ORForBranch),
+	.A(BranchEQ_wire),
 	.B(Zero_wire),
+	.C(ZeroANDBrachEQ)
+);
+
+
+ANDGate
+NotZeroAndBranchNE_AND
+(
+	.A(BranchNE_wire),
+	.B(~Zero_wire),
+	.C(NotZeroANDBrachNE)
+);
+
+ORGate
+ORGate_BranchNE_BranchEQ
+(
+	.A(ZeroANDBrachEQ),
+	.B(NotZeroANDBrachNE),
 	.C(PCSrc)
 );
 

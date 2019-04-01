@@ -31,7 +31,7 @@ assign RealAddress = {2'b0,Address[(DATA_WIDTH-1):2]};
 
 	initial
 	begin
-		$readmemh("C:/Users/IanGod/Documents/ITESO/6to Semestre/Arquitectura Computacional/QuartusProject/Files/Basic MIPS Processor/Text.dat", rom);
+		$readmemh("C:/Users/IanGod/Documents/ITESO/6to Semestre/Arquitectura Computacional/QuartusProject/Files/Basic MIPS Processor/text.dat", rom);
 	end
 
 	always @ (RealAddress)
