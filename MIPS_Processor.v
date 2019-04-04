@@ -61,8 +61,15 @@ wire [31:0] jumpAddressAux;
 wire [31:0] Super_MUX_PC_wire;	
 wire jump_wire;
 
+wire jal_wire;
+wire [4:0] WriteRegisterAux_wire;
+wire [31:0] ALUResult_Or_PC_8;
+wire [31:0] PC_8_wire;
 
 
+wire jr_wire;
+
+wire [31:0] Final_MUX_PC_wire;
 //******************************************************************/
 //******************************************************************/
 //******************************************************************/
@@ -78,7 +85,8 @@ ControlUnit
 	.ALUOp(ALUOp_wire),
 	.ALUSrc(ALUSrc_wire),	
 	.RegWrite(RegWrite_wire),
-	.Jump(jump_wire)
+	.Jump(jump_wire),
+	.Jal(jal_wire)
 );
 
 
@@ -90,7 +98,7 @@ PC_Register_b
 (
 	.clk(clk),
 	.reset(reset),
-	.NewPC(Super_MUX_PC_wire),
+	.NewPC(Final_MUX_PC_wire),
 	.PCValue(PC_wire)
 );
 
@@ -115,6 +123,15 @@ PC_Puls_4
 	.Result(PC_4_wire)
 );
 
+Adder32bits
+PC_Puls_8
+(
+	.Data0(PC_wire),
+	.Data1(8),
+	
+	.Result(PC_8_wire)
+);
+
 
 //******************************************************************/
 //******************************************************************/
@@ -131,9 +148,41 @@ MUX_ForRTypeAndIType
 	.MUX_Data0(Instruction_wire[20:16]),
 	.MUX_Data1(Instruction_wire[15:11]),
 	
+	.MUX_Output(WriteRegisterAux_wire)
+
+);
+
+//JAL
+Multiplexer2to1
+#(
+	.NBits(5)
+)
+Mux_ForJalOrWriteRegisterAux
+(
+	.Selector(jal_wire),
+	.MUX_Data0(WriteRegisterAux_wire),
+	.MUX_Data1(5'b11111),
+	
 	.MUX_Output(WriteRegister_wire)
 
 );
+
+//Multiplexer for PCPlus8OrALUResult, PARA JAL TAMBIEN
+Multiplexer2to1
+#(
+	.NBits(32)
+)
+Mux_ForAluResult_Or_PC_plus_8
+(
+	.Selector(jal_wire),
+	.MUX_Data0(ALUResult_wire),
+	.MUX_Data1(PC_8_wire),
+	
+	.MUX_Output(ALUResult_Or_PC_8)
+
+);
+
+//JAL RA SAVING THAT SHIT
 
 
 
@@ -146,7 +195,7 @@ Register_File
 	.WriteRegister(WriteRegister_wire),
 	.ReadRegister1(Instruction_wire[25:21]),
 	.ReadRegister2(Instruction_wire[20:16]),
-	.WriteData(ALUResult_wire),
+	.WriteData(ALUResult_Or_PC_8),
 	.ReadData1(ReadData1_wire),
 	.ReadData2(ReadData2_wire)
 
@@ -182,7 +231,6 @@ ArithmeticLogicUnitControl
 	.ALUOp(ALUOp_wire),
 	.ALUFunction(Instruction_wire[5:0]),
 	.ALUOperation(ALUOperation_wire)
-
 );
 
 
@@ -196,6 +244,7 @@ ArithmeticLogicUnit
 	.B(ReadData2OrInmmediate_wire),
 	.shamt(Instruction_wire[10:6]),
 	.Zero(Zero_wire),
+	.isJR(jr_wire),
 	.ALUResult(ALUResult_wire)
 );
 
@@ -253,6 +302,7 @@ Mux_PC4Wire_ImmediateExtendedAndedWire
 
 );
 
+//FOR JUMP INSTRUCTION
 ShiftLeft2
 J_Address_SL2
 (
@@ -268,6 +318,7 @@ Address_plus_PC4Wire
 	.Result(jumpAddress)
 );
 
+
 Multiplexer2to1
 #(
 	.NBits(32)
@@ -282,6 +333,19 @@ MUX_MuxPCWire_JumpAddress
 
 );
 
+Multiplexer2to1
+#(
+	.NBits(32)
+)
+MUX_SuperMUXPC_JR_PC8
+(
+	.Selector(jr_wire),
+	.MUX_Data0(Super_MUX_PC_wire),
+	.MUX_Data1(ALUResult_wire - 4), //hardcoded, probably wrong but it works
+	
+	.MUX_Output(Final_MUX_PC_wire)
+
+);
 
 assign ALUResultOut = ALUResult_wire;
 
