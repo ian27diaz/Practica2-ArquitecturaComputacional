@@ -55,8 +55,12 @@ integer ALUStatus;
 //Wires añadidos
 wire PCSrc;
 wire [31:0] InmmediateExtend_SL2_wire;
-/************ MODULOS SIN USAR: ******************/
-		//ShiftLeft2
+
+wire [31:0] jumpAddress;
+wire [31:0] jumpAddressAux;
+wire [31:0] Super_MUX_PC_wire;	
+wire jump_wire;
+
 
 
 //******************************************************************/
@@ -73,7 +77,8 @@ ControlUnit
 	.BranchEQ(BranchEQ_wire),
 	.ALUOp(ALUOp_wire),
 	.ALUSrc(ALUSrc_wire),	
-	.RegWrite(RegWrite_wire)
+	.RegWrite(RegWrite_wire),
+	.Jump(jump_wire)
 );
 
 
@@ -85,7 +90,7 @@ PC_Register_b
 (
 	.clk(clk),
 	.reset(reset),
-	.NewPC(MUX_PC_wire),
+	.NewPC(Super_MUX_PC_wire),
 	.PCValue(PC_wire)
 );
 
@@ -247,6 +252,36 @@ Mux_PC4Wire_ImmediateExtendedAndedWire
 	.MUX_Output(MUX_PC_wire)
 
 );
+
+ShiftLeft2
+J_Address_SL2
+(
+	.DataInput({6'b0, Instruction_wire[25:0]}),
+	.DataOutput(jumpAddressAux)
+);
+
+Adder32bits
+Address_plus_PC4Wire
+(
+	.Data0({PC_4_wire[31:28], 28'b0}),
+	.Data1(jumpAddressAux),
+	.Result(jumpAddress)
+);
+
+Multiplexer2to1
+#(
+	.NBits(32)
+)
+MUX_MuxPCWire_JumpAddress
+(
+	.Selector(jump_wire),
+	.MUX_Data0(MUX_PC_wire),
+	.MUX_Data1(jumpAddress - 4194304),
+	
+	.MUX_Output(Super_MUX_PC_wire)
+
+);
+
 
 assign ALUResultOut = ALUResult_wire;
 
