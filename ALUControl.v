@@ -30,11 +30,13 @@ localparam I_Type_ADDI   = 9'b100_xxxxxx; //Los primeros tres bits coinciden con
 localparam I_Type_ORI    = 9'b101_xxxxxx; //En los tipos I, no importa func por lo tanto las x
 localparam I_Type_ANDI   = 9'b110_xxxxxx;
 localparam I_Type_LUI	 = 9'b001_xxxxxx; //Las de tipo i no tienen el capmo de func, por lo tanto no importa.
-localparam I_Type_BEQ	 = 9'b010_xxxxxx;
-localparam I_Type_BNE	 = 9'b011_xxxxxx;
+
+localparam I_Type_SW		 = 9'b011_xxxxxx;
+localparam I_Type_LW		 = 9'b111_xxxxxx;
+
 
 reg [3:0] ALUControlValues;
-wire [8:0] Selector;
+wire [9:0] Selector;
 
 assign Selector = {ALUOp, ALUFunction};
 
@@ -50,8 +52,8 @@ always@(Selector)begin
 		R_Type_SLL: 	ALUControlValues = 4'b0101;
 		R_Type_SRL:		ALUControlValues = 4'b0110;
 		I_Type_LUI:		ALUControlValues = 4'b0111;
-		I_Type_BEQ:		ALUControlValues = 4'b1000;
-		I_Type_BNE:		ALUControlValues = 4'b1000;
+		I_Type_SW:		ALUControlValues = 4'b0011;
+		I_Type_LW:		ALUControlValues = 4'b0011;
 		default: ALUControlValues = 4'b1001;
 	endcase
 end
