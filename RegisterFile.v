@@ -24,6 +24,7 @@ module RegisterFile
 	input [4:0] ReadRegister1,
 	input [4:0] ReadRegister2,
 	input  [31:0] WriteData,
+	//salidas
 	output [31:0] ReadData1,
 	output [31:0] ReadData2
 

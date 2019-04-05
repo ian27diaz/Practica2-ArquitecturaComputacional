@@ -16,11 +16,11 @@
 * Date:
 *	01/03/2014
 ******************************************************************/
-
+//Cambio
 module ALU 
 (
 	input [3:0] ALUOperation,
-	input [31:0] rs,
+  input [31:0] rs,
 	input [31:0] A,
 	input [31:0] B,
 	input [4:0] shamt,
@@ -29,6 +29,7 @@ module ALU
 	output reg [31:0]ALUResult
 );
 
+//nuestra convensión
 localparam AND = 4'b0000;
 localparam OR  = 4'b0001;
 localparam NOR = 4'b0010;
@@ -39,6 +40,7 @@ localparam SRL = 4'b0110;
 localparam LUI = 4'b0111;
 localparam BRANCH = 4'b1000;
 localparam JR =  4'b1001;
+
 
    always @ (A or B or ALUOperation)
      begin

@@ -32,14 +32,15 @@ assign  PortOut = 0;
 wire BranchNE_wire;
 wire BranchEQ_wire;
 wire RegDst_wire;
-wire NotZeroANDBrachNE;  					
-wire ZeroANDBrachEQ;													
+wire NotZeroANDBrachNE;  						/********* SIN USAR **********/
+wire ZeroANDBrachEQ;								/********* SIN USAR **********/
+wire ORForBranch;									
 wire ALUSrc_wire;
 wire RegWrite_wire;
 wire Zero_wire;
-wire [2:0] ALUOp_wire;
+wire [3:0] ALUOp_wire;
 wire [3:0] ALUOperation_wire;
-wire [4:0] WriteRegister_wire;
+wire [4:0] WriteRegister_wire;//salida del primer mux
 wire [31:0] MUX_PC_wire;					
 wire [31:0] PC_wire;
 wire [31:0] Instruction_wire;
@@ -55,6 +56,15 @@ integer ALUStatus;
 //Wires añadidos
 wire PCSrc;
 wire [31:0] InmmediateExtend_SL2_wire;
+  
+wire [31:0] ramDataWire;
+wire MemtoRegWire;
+wire [31:0]MuxALUsrcORRamDataWire;
+wire [31:0]salidaMuxALUsrc;
+wire MemReadWire;
+wire MemWriteWire;
+/************ MODULOS SIN USAR: ******************/
+		//ShiftLeft2
 
 wire [31:0] jumpAddress;
 wire [31:0] jumpAddressAux;
@@ -81,14 +91,51 @@ ControlUnit
 	.OP(Instruction_wire[31:26]),
 	.RegDst(RegDst_wire),
 	.BranchNE(BranchNE_wire),
+	.MemRead(MemReadWire),
 	.BranchEQ(BranchEQ_wire),
+	.MemWrite(MemWriteWire),
+	.MemtoReg(MemtoRegWire),
 	.ALUOp(ALUOp_wire),
 	.ALUSrc(ALUSrc_wire),	
-	.RegWrite(RegWrite_wire),
+	.RegWrite(RegWrite_wire)
 	.Jump(jump_wire),
 	.Jal(jal_wire)
 );
 
+//Implementación de la RAM
+
+DataMemory 
+#(	
+	.DATA_WIDTH(),
+	.MEMORY_DEPTH()
+
+)
+RamMemory
+(
+	.WriteData(ReadData2_wire),
+	.Address(ALUResult_wire),
+	.MemWrite(MemWriteWire),
+	.MemRead(MemReadWire),
+	.clk(clk),
+	//salidas
+	.ReadData(ramDataWire)
+);
+
+Multiplexer2to1
+#(
+	.NBits()
+)
+MuxALUsrcORRamData
+(
+	.Selector(MemtoRegWire),
+	.MUX_Data0(ALUResult_wire),
+	.MUX_Data1(ramDataWire),
+	
+	.MUX_Output(MuxALUsrcORRamDataWire)
+
+);
+
+//Implementación de la RAM FIN
 
 PC_Register
 #(
@@ -101,8 +148,6 @@ PC_Register_b
 	.NewPC(Final_MUX_PC_wire),
 	.PCValue(PC_wire)
 );
-
-
 
 ProgramMemory
 #(
@@ -175,10 +220,10 @@ Multiplexer2to1
 Mux_ForAluResult_Or_PC_plus_8
 (
 	.Selector(jal_wire),
-	.MUX_Data0(ALUResult_wire),
+	.MUX_Data0(MuxALUsrcORRamDataWire),
 	.MUX_Data1(PC_8_wire),
 	
-	.MUX_Output(ALUResult_Or_PC_8)
+  .MUX_Output(ALUResult_Or_PC_8) ////////////////////////////////////////////////////////////
 
 );
 
@@ -220,7 +265,7 @@ MUX_ForReadDataAndInmediate
 	.MUX_Data0(ReadData2_wire),
 	.MUX_Data1(InmmediateExtend_wire),
 	
-	.MUX_Output(ReadData2OrInmmediate_wire)
+	.MUX_Output(salidaMuxALUsrc)
 
 );
 
@@ -239,9 +284,9 @@ ALU
 ArithmeticLogicUnit 
 (
 	.ALUOperation(ALUOperation_wire),
-	.rs(ReadData2_wire),
+  .rs(ReadData2_wire),
 	.A(ReadData1_wire),
-	.B(ReadData2OrInmmediate_wire),
+	.B(salidaMuxALUsrc),
 	.shamt(Instruction_wire[10:6]),
 	.Zero(Zero_wire),
 	.isJR(jr_wire),
@@ -301,6 +346,7 @@ Mux_PC4Wire_ImmediateExtendedAndedWire
 	.MUX_Output(MUX_PC_wire)
 
 );
+
 
 //FOR JUMP INSTRUCTION
 ShiftLeft2
