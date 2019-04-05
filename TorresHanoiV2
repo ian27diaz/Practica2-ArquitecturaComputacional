@@ -1,0 +1,112 @@
+#Team members: 
+#Ian Ricardo Díaz Meda
+#Luis Joaquín Ávalos Guzmán
+
+.text
+
+main:
+	addi $s0, $zero, 3 #Number of discs 4
+	#initializing pointers
+	addi $s5, $zero,0 #s5 -> origin tower 8
+	
+	addi $s6, $zero,8 #s6 -> dist tower 12 
+	
+	addi $s7, $zero,16 #s7 -> aux tower 16
+		
+	add $s5, $s5, -1 #20
+	add $s6, $s6, -1 #24
+	add $s7, $s7, -1 #28
+	 
+	#loading Discs in first tower ...
+	add $t0, $zero, $s0#32
+	loop_LD: 
+	add $s5, $s5, 1 #36
+	sw $t0, 0($s5) #40
+	addi, $t0, $t0, -1 #44
+	bne $t0, $zero, loop_LD #48
+		
+	#prepping arguments of Hanoi
+	add $a0, $zero, $s0 #52
+	add $a1, $zero, $s5 #56
+	add $a2, $zero, $s7 #60
+	add $a3, $zero, $s6 #64
+	jal Hanoi #68
+	j exit #72
+	#Hanoi(int n, Stack org, Stack dest, Stack aux);
+	#n    => #a0
+	#org  => #a1
+	#dest => #a2
+	#aux  => #a3
+	addi $t9, $zero, 1 #QUITAR PARA EL IC
+Hanoi:
+	addi $sp, $sp, -2 #76
+	#sw $a0, 0($sp)
+	sw $ra, 1($sp) #80
+	
+	beq $a0, 1, baseCase #if (n == 1) { baseCase} #84
+	
+	#else (casoInductivo) {
+	
+	addi $a0,$a0,-1 # n = n - 1
+	sw $a0, 0($sp)
+	
+	#en este primer paso del caso en esta llamada el origen siempre es el mismo pero cambios en la torres aux y dest
+	#en cada llamada aux será dest y dest será aux variando en los casos en que llame esta función
+	#n => #a0
+
+	#Cambiando apuntadores de pilas
+	add $t7,$zero,$a2 # t7  = destino
+	add $a2,$zero,$a3 #dest = aux
+	add $a3,$zero,$t7 #aux  = destino
+	
+	#Llamando a Hanoi(n-1,org,aux,dest)
+	jal Hanoi
+	
+	lw $a0, 0($sp)
+	lw $ra, 1($sp)
+	
+	add $t7, $zero, $a2 #ty = aux
+	add $a2, $zero, $a3 #aux = dest
+	add $a3, $zero, $t7 #dest = aux
+	#dest.push(o.pop());
+	lw $t8,0($a1) # $t8 = o.pop();
+	sw $zero,0($a1)
+	addi $a1,$a1,-1
+	addi $a2,$a2,1
+	sw $t8,0($a2)#d.push($t8);
+	
+	#sw $a0, 0($sp)
+	#sw $ra, 4($sp)
+	#en este paso del caso en esta llamada el dest siempre es el mismo pero habrá cambios en las torres aux y orig
+	#en cada llamada aux será orig y origin será aux variando en los casos en que llame esta función
+	add $t7,$zero,$a1 #t7 = org
+	add $a1,$zero,$a3 #org = aux
+	add $a3,$zero,$t7 #aux = org
+		
+	jal Hanoi #hanoi(n-1,aux,dest,origin)
+	
+	add $t7, $zero, $a1 #ty = aux
+	add $a1, $zero, $a3 #aux = dest
+	add $a3, $zero, $t7 #dest = aux
+	j endHanoi
+	#} //End of Else
+	
+	baseCase:
+	
+	#addi $t9, $zero, 35 #QUITAR PARA EL IC
+	#Mov disc from orig to dest
+	lw $t8,0($a1) # $t8 = o.pop();
+	sw $zero,0($a1)
+	addi $a1,$a1,-1
+	addi $a2,$a2,1
+	sw $t8,0($a2)#d.push($t8);
+	
+	endHanoi:
+	#terminando Hanoi
+	lw $a0, 0($sp)
+	lw $ra, 1($sp)
+	addi $sp, $sp, 2
+	
+	jr $ra	
+exit:
+	

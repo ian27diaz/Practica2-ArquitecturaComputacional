@@ -19,21 +19,21 @@ module ALUControl
 	output [3:0] ALUOperation
 );
 
-localparam R_Type_JR		 = 9'b1111_001000;
-localparam R_Type_AND    = 9'b1111_100100;
-localparam R_Type_OR     = 9'b1111_100101;
-localparam R_Type_NOR    = 9'b1111_100111; //ADD y addi con el mismo alucontrolvalues
-localparam R_Type_ADD    = 9'b1111_100000;
-localparam R_Type_SLL	 = 9'b1111_000000;
-localparam R_Type_SRL	 = 9'b1111_000010;
-localparam I_Type_ADDI   = 9'b1000_xxxxxx; //Los primeros tres bits coinciden con Control.v
-localparam I_Type_ORI    = 9'b1010_xxxxxx; //En los tipos I, no importa func por lo tanto las x
-localparam I_Type_ANDI   = 9'b1100_xxxxxx;
-localparam I_Type_LUI	 = 9'b0010_xxxxxx; //Las de tipo i no tienen el capmo de func, por lo tanto no importa.
-localparam I_Type_BEQ	 = 9'b0100_xxxxxx;
-localparam I_Type_BNE	 = 9'b0111_xxxxxx;
-localparam I_Type_SW		 = 9'b0110_xxxxxx;
-localparam I_Type_LW		 = 9'b1110_xxxxxx;
+localparam R_Type_JR		 = 10'b1111_001000;
+localparam R_Type_AND    = 10'b1111_100100;
+localparam R_Type_OR     = 10'b1111_100101;
+localparam R_Type_NOR    = 10'b1111_100111; //ADD y addi con el mismo alucontrolvalues
+localparam R_Type_ADD    = 10'b1111_100000;
+localparam R_Type_SLL	 = 10'b1111_000000;
+localparam R_Type_SRL	 = 10'b1111_000010;
+localparam I_Type_ADDI   = 10'b1000_xxxxxx; //Los primeros tres bits coinciden con Control.v
+localparam I_Type_ORI    = 10'b1010_xxxxxx; //En los tipos I, no importa func por lo tanto las x
+localparam I_Type_ANDI   = 10'b1100_xxxxxx;
+localparam I_Type_LUI	 = 10'b0010_xxxxxx; //Las de tipo i no tienen el capmo de func, por lo tanto no importa.
+localparam I_Type_BEQ	 = 10'b0100_xxxxxx;
+localparam I_Type_BNE	 = 10'b0111_xxxxxx;
+localparam I_Type_SW		 = 10'b0110_xxxxxx;
+localparam I_Type_LW		 = 10'b1110_xxxxxx;
 
 
 reg [3:0] ALUControlValues;

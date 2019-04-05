@@ -54,7 +54,7 @@ always@(OP) begin
 		I_Type_LUI:	  ControlValues= 14'b000_101_00_00_0010;
 		I_Type_BEQ:	  ControlValues= 14'b000_101_00_01_0100; //Modificacion BEQ
 		I_Type_BNE:	  ControlValues= 14'b000_101_00_10_0111;
-    I_Type_SW:	  ControlValues= 14'b000_100_01_00_0110;
+		I_Type_SW:	  ControlValues= 14'b000_100_01_00_0110;
 		I_Type_LW:	  ControlValues= 14'b000_111_10_00_1110;
 		J_Type_JUMP:  ControlValues= 14'b010_000_00_00_0000;
 		J_Type_JAL:   ControlValues= 14'b111_101_00_00_0000; //Tipo R para el AluControl

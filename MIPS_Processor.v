@@ -97,7 +97,7 @@ ControlUnit
 	.MemtoReg(MemtoRegWire),
 	.ALUOp(ALUOp_wire),
 	.ALUSrc(ALUSrc_wire),	
-	.RegWrite(RegWrite_wire)
+	.RegWrite(RegWrite_wire),
 	.Jump(jump_wire),
 	.Jal(jal_wire)
 );
