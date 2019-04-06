@@ -26,6 +26,8 @@ localparam R_Type_NOR    = 10'b1111_100111; //ADD y addi con el mismo alucontrol
 localparam R_Type_ADD    = 10'b1111_100000;
 localparam R_Type_SLL	 = 10'b1111_000000;
 localparam R_Type_SRL	 = 10'b1111_000010;
+localparam R_Type_SUB	 = 10'b1111_100010;
+
 localparam I_Type_ADDI   = 10'b1000_xxxxxx; //Los primeros tres bits coinciden con Control.v
 localparam I_Type_ORI    = 10'b1010_xxxxxx; //En los tipos I, no importa func por lo tanto las x
 localparam I_Type_ANDI   = 10'b1100_xxxxxx;
@@ -50,6 +52,7 @@ always@(Selector)begin
 		R_Type_NOR:		ALUControlValues = 4'b0010;
 		R_Type_ADD:		ALUControlValues = 4'b0011;
 		I_Type_ADDI:	ALUControlValues = 4'b0011;
+		R_Type_SUB:		ALUControlValues = 4'b0100;
 		R_Type_SLL: 	ALUControlValues = 4'b0101;
 		R_Type_SRL:		ALUControlValues = 4'b0110;
 		I_Type_LUI:		ALUControlValues = 4'b0111;

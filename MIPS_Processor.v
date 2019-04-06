@@ -10,7 +10,7 @@
 
 module MIPS_Processor
 #(
-	parameter MEMORY_DEPTH = 32
+	parameter MEMORY_DEPTH = 64
 )
 
 (
@@ -63,8 +63,6 @@ wire [31:0]MuxALUsrcORRamDataWire;
 wire [31:0]salidaMuxALUsrc;
 wire MemReadWire;
 wire MemWriteWire;
-/************ MODULOS SIN USAR: ******************/
-		//ShiftLeft2
 
 wire [31:0] jumpAddress;
 wire [31:0] jumpAddressAux;
@@ -73,9 +71,7 @@ wire jump_wire;
 
 wire jal_wire;
 wire [4:0] WriteRegisterAux_wire;
-wire [31:0] ALUResult_Or_PC_8;
-wire [31:0] PC_8_wire;
-
+wire [31:0] ALUResult_Or_PC_4;
 
 wire jr_wire;
 
@@ -121,19 +117,6 @@ RamMemory
 	.ReadData(ramDataWire)
 );
 
-Multiplexer2to1
-#(
-	.NBits()
-)
-MuxALUsrcORRamData
-(
-	.Selector(MemtoRegWire),
-	.MUX_Data0(ALUResult_wire),
-	.MUX_Data1(ramDataWire),
-	
-	.MUX_Output(MuxALUsrcORRamDataWire)
-
-);
 
 //Implementación de la RAM FIN
 
@@ -168,14 +151,6 @@ PC_Puls_4
 	.Result(PC_4_wire)
 );
 
-Adder32bits
-PC_Puls_8
-(
-	.Data0(PC_wire),
-	.Data1(8),
-	
-	.Result(PC_8_wire)
-);
 
 
 //******************************************************************/
@@ -187,7 +162,7 @@ Multiplexer2to1
 #(
 	.NBits(5)
 )
-MUX_ForRTypeAndIType
+MUX_ForRTypeAndIType //MUX para elegir en que registro guardar, toma en cuenta si es I o R
 (
 	.Selector(RegDst_wire),
 	.MUX_Data0(Instruction_wire[20:16]),
@@ -202,7 +177,7 @@ Multiplexer2to1
 #(
 	.NBits(5)
 )
-Mux_ForJalOrWriteRegisterAux
+Mux_ForJalOrWriteRegisterAux //MUX para elegir el camino normal o en caso de ser jal, escribir en RA
 (
 	.Selector(jal_wire),
 	.MUX_Data0(WriteRegisterAux_wire),
@@ -212,22 +187,35 @@ Mux_ForJalOrWriteRegisterAux
 
 );
 
-//Multiplexer for PCPlus8OrALUResult, PARA JAL TAMBIEN
-Multiplexer2to1
+
+Multiplexer2to1 //Mux de hasta la derecha del diagrama.
 #(
-	.NBits(32)
+	.NBits()
 )
-Mux_ForAluResult_Or_PC_plus_8
+MuxALUsrcORRamData //
 (
-	.Selector(jal_wire),
-	.MUX_Data0(MuxALUsrcORRamDataWire),
-	.MUX_Data1(PC_8_wire),
+	.Selector(MemtoRegWire),
+	.MUX_Data0(ALUResult_wire),
+	.MUX_Data1(ramDataWire),
 	
-  .MUX_Output(ALUResult_Or_PC_8) ////////////////////////////////////////////////////////////
+	.MUX_Output(MuxALUsrcORRamDataWire)
 
 );
 
-//JAL RA SAVING THAT SHIT
+//Multiplexer for PCPlus4OrALUResult, PARA JAL TAMBIEN
+Multiplexer2to1 //Este mux decide si mandar lo del MUX de hasta la derecha O el PC_4wire, en caso de ser jal,
+#(						// para escribir en RA el PC_4_Wire
+	.NBits(32)
+)
+Mux_ForAluResult_Or_PC_plus_4 
+(
+	.Selector(jal_wire),
+	.MUX_Data0(MuxALUsrcORRamDataWire),
+	.MUX_Data1(PC_4_wire),
+	
+  .MUX_Output(ALUResult_Or_PC_4) ////////////////////////////////////////////////////////////
+
+);
 
 
 
@@ -240,7 +228,7 @@ Register_File
 	.WriteRegister(WriteRegister_wire),
 	.ReadRegister1(Instruction_wire[25:21]),
 	.ReadRegister2(Instruction_wire[20:16]),
-	.WriteData(ALUResult_Or_PC_8),
+	.WriteData(ALUResult_Or_PC_4), //Si es JAl, sera PC_4
 	.ReadData1(ReadData1_wire),
 	.ReadData2(ReadData2_wire)
 
@@ -255,7 +243,7 @@ SignExtendForConstants
 
 
 
-Multiplexer2to1
+Multiplexer2to1 //Este es el mux entre la ALU y el Register Files
 #(
 	.NBits(32)
 )
@@ -286,13 +274,14 @@ ArithmeticLogicUnit
 	.ALUOperation(ALUOperation_wire),
   .rs(ReadData2_wire),
 	.A(ReadData1_wire),
-	.B(salidaMuxALUsrc),
+	.B(salidaMuxALUsrc), //Si es immediate o lo de Register File
 	.shamt(Instruction_wire[10:6]),
 	.Zero(Zero_wire),
-	.isJR(jr_wire),
+	.isJR(jr_wire), //Como JR es tipo R, aqui decido el cable jr.
 	.ALUResult(ALUResult_wire)
 );
 
+/******* Logica para los cables branches ***********/
 ANDGate
 ZeroAndBranchEQ_AND
 (
@@ -317,15 +306,16 @@ ORGate_BranchNE_BranchEQ
 	.B(NotZeroANDBrachNE),
 	.C(PCSrc)
 );
+/****************************************************/
 
-ShiftLeft2
+ShiftLeft2 //Este dato es el que es la direccion de branch
 SL2_SignExtend
 (
 	.DataInput(InmmediateExtend_wire),
 	.DataOutput(InmmediateExtend_SL2_wire)
 );
 
-Adder32bits
+Adder32bits //Este es el adder del PC_4_Wire y el dato inmediato<<2
 PC4_Immediate
 (
 	.Data0(PC_4_wire),
@@ -333,7 +323,7 @@ PC4_Immediate
 	.Result(InmmediateExtendAnded_wire)
 );
 
-Multiplexer2to1
+Multiplexer2to1 //Este multiplexor es el que decide si mandar branchAddr o el PC_4_Wire, debe ser el primer mux
 #(
 	.NBits(32)
 )
@@ -349,14 +339,14 @@ Mux_PC4Wire_ImmediateExtendedAndedWire
 
 
 //FOR JUMP INSTRUCTION
-ShiftLeft2
+ShiftLeft2 //Logica para la JumpAddr
 J_Address_SL2
 (
 	.DataInput({6'b0, Instruction_wire[25:0]}),
 	.DataOutput(jumpAddressAux)
 );
 
-Adder32bits
+Adder32bits //Logica para la JumpAddr
 Address_plus_PC4Wire
 (
 	.Data0({PC_4_wire[31:28], 28'b0}),
@@ -365,7 +355,7 @@ Address_plus_PC4Wire
 );
 
 
-Multiplexer2to1
+Multiplexer2to1 //Este es el segundo mux del PC, decide si mandar lo de BranchAddr/Pc_4_wire o la jumpAddr
 #(
 	.NBits(32)
 )
@@ -379,15 +369,15 @@ MUX_MuxPCWire_JumpAddress
 
 );
 
-Multiplexer2to1
-#(
+Multiplexer2to1 //Este mux pretende escribir entre (BranchAddr/Pc_4_wire)/jumpAddr o el AluResult, que deberia de
+#(					 //ser lo que esta guardado en RA, que es el PC que se almacenó en el JAL
 	.NBits(32)
 )
 MUX_SuperMUXPC_JR_PC8
 (
 	.Selector(jr_wire),
 	.MUX_Data0(Super_MUX_PC_wire),
-	.MUX_Data1(ALUResult_wire - 4), //hardcoded, probably wrong but it works
+	.MUX_Data1(MuxALUsrcORRamDataWire), //hardcoded, probably wrong but it works
 	
 	.MUX_Output(Final_MUX_PC_wire)
 

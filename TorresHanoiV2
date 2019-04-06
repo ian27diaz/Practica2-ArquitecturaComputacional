@@ -5,17 +5,19 @@
 .text
 
 main:
-	addi $s0, $zero, 3 #Number of discs 4
+	addi $sp, $zero, 255
+	
+	addi $s0, $zero, 3 #Number of discs
 	#initializing pointers
-	addi $s5, $zero,0 #s5 -> origin tower 8
+	addi $s5, $zero,0 #s5 -> origin tower
 	
-	addi $s6, $zero,8 #s6 -> dist tower 12 
+	addi $s6, $zero,8 #s6 -> dist tower
 	
-	addi $s7, $zero,16 #s7 -> aux tower 16
+	addi $s7, $zero,16 #s7 -> aux tower
 		
-	add $s5, $s5, -1 #20
-	add $s6, $s6, -1 #24
-	add $s7, $s7, -1 #28
+	add $s5, $s5, -1 
+	add $s6, $s6, -1 
+	add $s7, $s7, -1 
 	 
 	#loading Discs in first tower ...
 	add $t0, $zero, $s0#32
@@ -43,7 +45,7 @@ Hanoi:
 	#sw $a0, 0($sp)
 	sw $ra, 1($sp) #80
 	
-	beq $a0, 1, baseCase #if (n == 1) { baseCase} #84
+	beq $a0, 1, baseCase #if (n == 1) { baseCase} #88
 	
 	#else (casoInductivo) {
 	
@@ -91,7 +93,7 @@ Hanoi:
 	j endHanoi
 	#} //End of Else
 	
-	baseCase:
+	baseCase: #188
 	
 	#addi $t9, $zero, 35 #QUITAR PARA EL IC
 	#Mov disc from orig to dest
@@ -106,7 +108,7 @@ Hanoi:
 	lw $a0, 0($sp)
 	lw $ra, 1($sp)
 	addi $sp, $sp, 2
-	
+
 	jr $ra	
 exit:
 	
