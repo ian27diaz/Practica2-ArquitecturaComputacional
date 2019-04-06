@@ -32,8 +32,8 @@ assign  PortOut = 0;
 wire BranchNE_wire;
 wire BranchEQ_wire;
 wire RegDst_wire;
-wire NotZeroANDBrachNE;  						/********* SIN USAR **********/
-wire ZeroANDBrachEQ;								/********* SIN USAR **********/
+wire NotZeroANDBrachNE;  						
+wire ZeroANDBrachEQ;							
 wire ORForBranch;									
 wire ALUSrc_wire;
 wire RegWrite_wire;
@@ -51,7 +51,7 @@ wire [31:0] ReadData2OrInmmediate_wire;
 wire [31:0] ALUResult_wire;
 wire [31:0] PC_4_wire;
 wire [31:0] InmmediateExtendAnded_wire; 	
-wire [31:0] PCtoBranch_wire;					/********* SIN USAR **********/
+wire [31:0] PCtoBranch_wire;	
 integer ALUStatus;
 //Wires añadidos
 wire PCSrc;
@@ -76,8 +76,6 @@ wire [31:0] ALUResult_Or_PC_4;
 wire jr_wire;
 
 wire [31:0] Final_MUX_PC_wire;
-//******************************************************************/
-//******************************************************************/
 //******************************************************************/
 //******************************************************************/
 //******************************************************************/
@@ -162,8 +160,8 @@ Multiplexer2to1
 #(
 	.NBits(5)
 )
-MUX_ForRTypeAndIType //MUX para elegir en que registro guardar, toma en cuenta si es I o R
-(
+MUX_ForRTypeAndIType //MUX para elegir en que 
+(	//registro guardar, toma en cuenta si es I o R
 	.Selector(RegDst_wire),
 	.MUX_Data0(Instruction_wire[20:16]),
 	.MUX_Data1(Instruction_wire[15:11]),
@@ -177,8 +175,8 @@ Multiplexer2to1
 #(
 	.NBits(5)
 )
-Mux_ForJalOrWriteRegisterAux //MUX para elegir el camino normal o en caso de ser jal, escribir en RA
-(
+Mux_ForJalOrWriteRegisterAux //MUX para elegir el 
+(	//camino normal o en caso de ser jal, escribir en RA
 	.Selector(jal_wire),
 	.MUX_Data0(WriteRegisterAux_wire),
 	.MUX_Data1(5'b11111),
@@ -203,8 +201,8 @@ MuxALUsrcORRamData //
 );
 
 //Multiplexer for PCPlus4OrALUResult, PARA JAL TAMBIEN
-Multiplexer2to1 //Este mux decide si mandar lo del MUX de hasta la derecha O el PC_4wire, en caso de ser jal,
-#(						// para escribir en RA el PC_4_Wire
+Multiplexer2to1 //Este mux decide si mandar lo del MUX 
+#(	// de hasta la derecha O el PC_4wire, en caso de ser jal, para escribir en RA el PC_4_Wire
 	.NBits(32)
 )
 Mux_ForAluResult_Or_PC_plus_4 
@@ -369,9 +367,9 @@ MUX_MuxPCWire_JumpAddress
 
 );
 
-Multiplexer2to1 //Este mux pretende escribir entre (BranchAddr/Pc_4_wire)/jumpAddr o el AluResult, que deberia de
-#(					 //ser lo que esta guardado en RA, que es el PC que se almacenó en el JAL
-	.NBits(32)
+Multiplexer2to1 //Este mux pretende escribir entre 
+#(	//(BranchAddr/Pc_4_wire)/jumpAddr o el AluResult, que deberia 
+	.NBits(32)	//de ser lo que esta guardado en RA, que es el PC que se almacenó en el JAL
 )
 MUX_SuperMUXPC_JR_PC8
 (
